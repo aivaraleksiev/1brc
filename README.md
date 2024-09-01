@@ -9,7 +9,7 @@ The task is to perform basic floating-point arithmetic on 1 billion rows as quic
 
 ## Approach
 
-This solution prioritizes speed over safety and convenience, focusing on raw performance when processing large datasets. _**Note that**_  this code is optimized for specific use cases and is not intended as a model for reusable or maintainable code.
+This solution prioritizes speed over safety and convenience, focusing on raw performance when processing large datasets. <br> _**Note that**_  this code is optimized for specific use cases and is not intended as a model for reusable or maintainable code.
 
 ### Key Techniques
 
