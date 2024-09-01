@@ -56,4 +56,4 @@ Benchmarks were run on a laptop CPU with 4 cores / 8 threads. The original chall
 
 | Rows       | 100 Million | 260 Million | 500 Million | 1 Billion |
 |------------|-------------|-------------|-------------|-----------|
-| Avg Time   | 0.8 s       | 2.1 s       | 4.25 s      | 12.95 s   |
+| Avg Time   | 0.8 s       | 2.1 s       | 4.25 s      | 12.9 s   |
