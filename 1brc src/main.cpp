@@ -1,6 +1,6 @@
 // Author: Ayvar Aleksiev 2024
 
-#ifdef WIN32
+#ifdef _WIN32
 // Necessary for SetConsoleOutputCP and CP_UTF8
 #include <windows.h> 
 #endif
@@ -15,7 +15,7 @@
 
 int main(int argc, char **argv)
 {
-#ifdef WIN32
+#ifdef _WIN32
    // Set the console output code page to UTF-8
    SetConsoleOutputCP(CP_UTF8);
 #endif
