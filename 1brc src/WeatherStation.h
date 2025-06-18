@@ -53,7 +53,7 @@ public:
 
    void print() const {
       std::stringstream ostr;
-      std::cout << '{';
+      ostr << '{';
       for (auto const& [city, tmpStats] : _cityTemps) {
          ostr << city << "=" << tmpStats._min * 0.1;
          ostr << std::fixed << std::setprecision(1);
