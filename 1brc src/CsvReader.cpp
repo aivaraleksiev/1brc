@@ -111,7 +111,7 @@ CsvReader::processMemoryChunks_(
          std::string_view cityView = chunkWiew.substr(0, csvSeparatorPos);
          std::string_view numberView = chunkWiew.substr(floatNumberStartPos, floatNumberLength);
 
-         intermediateResults[chunkIdx].insert_or_assign(h, cityView, parseDecimalNumber(numberView.data()));
+         intermediateResults[chunkIdx].insert_or_assign(h, cityView, parseDecimalNumber_(numberView.data()));
 
          size_t const offsetLineEndPos = dotPos + size_t(2);
          size_t const lineEndPos = chunkWiew.find('\n', offsetLineEndPos);
