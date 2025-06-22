@@ -47,12 +47,8 @@ public:
    inline void addTemperature(CityNameView city, int32_t min, int32_t max, int32_t sum, int32_t size)
    {   
       auto& stats = _cityTemps[city];
-      if (stats._min > min) {
-         stats._min = min;
-      }
-      if (stats._max < max) {
-         stats._max = max;
-      }
+      stats._min = std::min(stats._min, min);
+      stats._max = std::max(stats._max, max);
       stats._sum += sum;
       stats._count += size;
    }
