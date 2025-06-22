@@ -21,7 +21,7 @@ private:
    
    // Splitting file to memory chunks.
    std::vector<MemoryChunk>
-      splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSizePerThread);
+      splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize);
 
    // Process the memory chunks and creates the final version of WeatherStation.
    void processMemoryChunks_(
