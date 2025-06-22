@@ -44,20 +44,17 @@ public:
       int32_t _count{ 0 };
    };
 
-   inline void addTemperature(
-      CityNameView city,
-      int32_t min, int32_t max, int32_t sum, int32_t size) {
-      
-      if (_cityTemps[city]._min > min) {
-         _cityTemps[city]._min = min;
+   inline void addTemperature(CityNameView city, int32_t min, int32_t max, int32_t sum, int32_t size)
+   {   
+      auto& stats = _cityTemps[city];
+      if (stats._min > min) {
+         stats._min = min;
       }
-      if (_cityTemps[city]._max < max) {
-         _cityTemps[city]._max = max;
+      if (stats._max < max) {
+         stats._max = max;
       }
-      _cityTemps[city]._sum += sum;
-      _cityTemps[city]._count += size;
-
-
+      stats._sum += sum;
+      stats._count += size;
    }
 
    void print() const {
