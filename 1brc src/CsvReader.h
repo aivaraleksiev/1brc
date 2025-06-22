@@ -28,7 +28,7 @@ private:
       std::vector<MemoryChunk>&& fileChunks, WeatherStation& result);
 
    // Parses only one decimal numbers of type "x.y", "xx.y", "-x.y", "-xx.y".
-   inline int parseDecimalNumber(const char* s)
+   inline int parseDecimalNumber_(const char* s)
    {
       // parse sign
       int sign = 1;
