@@ -21,6 +21,14 @@ This solution prioritizes speed over safety and convenience, focusing on raw per
 - **Specialized Hash Map**: Designed for scenarios with a predefined, small set of elements—perfect for handling fixed keys like city names.
 - **Custom Iterator**: Provides STL-style iteration over the custom hash map for ease of use.
 
+## Performance Benchmark
+
+Benchmarks were run on a laptop CPU with 4 cores / 8 threads. The original challenge was based on a machine with 32 threads.
+
+| Rows       | 100 Million | 250 Million | 500 Million | 1 Billion |
+|------------|-------------|-------------|-------------|-----------|
+| Avg Time   | 0.8 s       | 2.0 s       | 4.25 s      | 12.9 s    |
+
 ## Build Instructions
 
 To build and run the project, follow these steps:
@@ -49,11 +57,3 @@ To build and run the project, follow these steps:
    ```bash
    1br.exe "path_to_file"
    ```
-
-## Performance Benchmark
-
-Benchmarks were run on a laptop CPU with 4 cores / 8 threads. The original challenge was based on a machine with 32 threads.
-
-| Rows       | 100 Million | 250 Million | 500 Million | 1 Billion |
-|------------|-------------|-------------|-------------|-----------|
-| Avg Time   | 0.8 s       | 2.0 s       | 4.25 s      | 12.9 s   |
