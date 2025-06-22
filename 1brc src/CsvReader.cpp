@@ -65,21 +65,15 @@ CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSizePe
    for (uint64_t chunkIdx = 0; chunkIdx < _threadsCount; ++chunkIdx) {
       const auto nextIdx = view.find('\n', begin_idx);
       if (nextIdx != std::string_view::npos) {
-         chunksResult.push_back(
-            {
-             std::string_view { &view[runner], nextIdx - prevIdx + 1}, // +1 is to insert the '\n'
-             chunkIdx
-            });
+         chunksResult.emplace_back(
+            std::string_view{ &view[runner], nextIdx - prevIdx + 1 }, // +1 is to insert the '\n'
+            chunkIdx);
          runner += nextIdx - prevIdx + 1;
          prevIdx = nextIdx + 1;
          begin_idx = nextIdx + chunkSizePerThread;
       }
       else {
-         chunksResult.push_back(
-            {
-             std::string_view { &view[runner], view.size() - prevIdx},
-             chunkIdx
-            });
+         chunksResult.emplace_back(std::string_view{ &view[runner], view.size() - prevIdx }, chunkIdx);
          break;
       }
    }
