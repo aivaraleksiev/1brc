@@ -2,6 +2,7 @@
 
 #ifdef _WIN32
 // Necessary for SetConsoleOutputCP and CP_UTF8
+#define NOMINMAX
 #include <windows.h> 
 #endif
 
