@@ -54,13 +54,13 @@ CsvReader::parse(std::string const& file, WeatherStation& result)
 }
 
 std::vector<MemoryChunk>
-CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSizePerThread)
+CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize)
 {
    std::vector<MemoryChunk> chunksResult;
    chunksResult.reserve(_threadsCount);
    
    size_t runner = 0;
-   std::string_view::size_type begin_idx = chunkSizePerThread;
+   std::string_view::size_type begin_idx = chunkSize;
    std::string_view::size_type prevIdx = 0;
    for (uint64_t chunkIdx = 0; chunkIdx < _threadsCount; ++chunkIdx) {
       const auto nextIdx = view.find('\n', begin_idx);
@@ -70,7 +70,7 @@ CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSizePe
             chunkIdx);
          runner += nextIdx - prevIdx + 1;
          prevIdx = nextIdx + 1;
-         begin_idx = nextIdx + chunkSizePerThread;
+         begin_idx = nextIdx + chunkSize;
       }
       else {
          chunksResult.emplace_back(std::string_view{ &view[runner], view.size() - prevIdx }, chunkIdx);
