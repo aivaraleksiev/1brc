@@ -45,7 +45,7 @@ public:
    };
 
    inline void addTemperature(
-      const CityNameView& city,
+      CityNameView city,
       int32_t min, int32_t max, int32_t sum, int32_t size) {
       
       if (_cityTemps[city]._min > min) {
