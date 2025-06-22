@@ -29,12 +29,8 @@ public:
    struct TempStats {
       inline void addTemp(int32_t temp)
       {
-         if (temp < _min) {
-            _min = temp;
-         }
-         if (temp > _max) {
-            _max = temp;
-         }
+         _min = std::min(temp, _min);
+         _max = std::max(temp, _max);
          _sum += temp;
          ++_count;
       }
