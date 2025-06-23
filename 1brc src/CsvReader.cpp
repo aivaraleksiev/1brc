@@ -102,7 +102,8 @@ CsvReader::processMemoryChunks_(
          size_t const floatNumberLength = dotPos + size_t(1) - csvSeparatorPos; // Example: ...h;13.5
 
          std::string_view cityView(chunkPtr, csvSeparatorPos);
-         std::string_view numberView = chunkWiew.substr(floatNumberStartPos, floatNumberLength);
+         const char* numberPtr = chunkPtr + floatNumberStartPos;
+         std::string_view numberView(numberPtr, floatNumberLength);
 
          intermediateResults[chunkIdx].insert_or_assign(h, cityView, parseDecimalNumber_(numberView.data()));
 
