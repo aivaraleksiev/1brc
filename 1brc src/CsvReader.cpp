@@ -99,8 +99,7 @@ CsvReader::processMemoryChunks_(
          size_t const offsetDotPos = csvSeparatorPos + size_t(2);
          size_t const dotPos = chunkWiew.find(DECIMAL_SIGN, offsetDotPos);
          size_t const floatNumberStartPos = csvSeparatorPos + size_t(1);
-         size_t const floatNumberLength = dotPos + size_t(1) - csvSeparatorPos; // Example: ...h;13.5
-
+         
          std::string_view cityView(chunkPtr, csvSeparatorPos);
          // Number view
          const char* numberPtr = chunkPtr + floatNumberStartPos;
