@@ -40,7 +40,7 @@ inline constexpr hash_t hashMask = hash_t(BucketSize - 1);
 };*/
 
 struct FastCharacterHash16Func {
-   void operator()(uint8_t ch, hash_t& h) {
+   inline void operator()(uint8_t ch, hash_t& h) {
       h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
       h = h HASH_OP hash_t(ch);
    }
