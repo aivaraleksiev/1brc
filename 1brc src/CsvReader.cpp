@@ -89,7 +89,7 @@ CsvReader::processMemoryChunks_(
          const char* chunkPtr = chunkView.data();
          hash_t h = 0;
          size_t csvSeparatorPos = 0;
-         // Find CSV separator and compute hash for city name
+         // Compute hash for City name and find CSV separator ';'.
          while (chunkPtr[csvSeparatorPos] != CSV_SEPARATOR) {
             h = FastCharacterHash16Func(chunkPtr[csvSeparatorPos], h);
             ++csvSeparatorPos;
