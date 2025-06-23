@@ -91,7 +91,7 @@ CsvReader::processMemoryChunks_(
          size_t csvSeparatorPos = 0;
          // Find CSV separator and compute hash for city name
          while (chunkPtr[csvSeparatorPos] != CSV_SEPARATOR) {
-            FastCharacterHash16Func()(chunkPtr[csvSeparatorPos], h);
+            h = FastCharacterHash16Func()(chunkPtr[csvSeparatorPos], h);
             ++csvSeparatorPos;
          }
          std::string_view cityView(chunkPtr, csvSeparatorPos);
