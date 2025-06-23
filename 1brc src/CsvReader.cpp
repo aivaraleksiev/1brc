@@ -58,24 +58,17 @@ CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize)
 {
    std::vector<MemoryChunk> chunksResult;
    chunksResult.reserve(_threadsCount);
-   
-   size_t runner = 0;
-   std::string_view::size_type begin_idx = chunkSize;
-   std::string_view::size_type prevIdx = 0;
-   for (uint64_t chunkIdx = 0; chunkIdx < _threadsCount; ++chunkIdx) {
-      const auto nextIdx = view.find('\n', begin_idx);
-      if (nextIdx != std::string_view::npos) {
-         chunksResult.emplace_back(
-            std::string_view{ &view[runner], nextIdx - prevIdx + 1 }, // +1 is to insert the '\n'
-            chunkIdx);
-         runner += nextIdx - prevIdx + 1;
-         prevIdx = nextIdx + 1;
-         begin_idx = nextIdx + chunkSize;
-      }
-      else {
-         chunksResult.emplace_back(std::string_view{ &view[runner], view.size() - prevIdx }, chunkIdx);
-         break;
-      }
+
+   size_t start = 0;
+   for (uint64_t i = 0; i < _threadsCount; ++i) {
+      size_t end = std::min(start + chunkSize, view.size());
+      // Find the next newline after the proposed end
+      while (end < view.size() && view[end] != '\n') ++end;
+      if (end < view.size()) ++end; // Include the newline
+
+      chunksResult.emplace_back(std::string_view{ &view[start], end - start }, i);
+      start = end;
+      if (start >= view.size()) { break; }
    }
 
    return chunksResult;
