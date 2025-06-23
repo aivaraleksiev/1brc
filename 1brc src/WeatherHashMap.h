@@ -39,12 +39,11 @@ inline constexpr hash_t hashMask = hash_t(BucketSize - 1);
    }
 };*/
 
-struct FastCharacterHash16Func {
-   inline void operator()(uint8_t ch, hash_t& h) {
-      h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
-      h = h HASH_OP hash_t(ch);
-   }
-};
+inline hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
+{
+   h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
+   return h HASH_OP hash_t(ch);
+}
 
 // Size is 32 bytes.
 using KeyValuePair = std::pair<std::string_view, WeatherStation::TempStats>;
