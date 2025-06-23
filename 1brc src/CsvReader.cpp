@@ -86,21 +86,21 @@ CsvReader::processMemoryChunks_(
       auto const chunkIdx = chunk._idx;
 
       while (!chunkWiew.empty()) {
-         //
          const char* chunkPtr = chunkWiew.data();
          hash_t h = 0;
          size_t csvSeparatorPos = 0;
+         // Find CSV separator and compute hash for city name
          while (chunkPtr[csvSeparatorPos] != CSV_SEPARATOR) {
             FastCharacterHash16Func()(chunkPtr[csvSeparatorPos], h);
             ++csvSeparatorPos;
          }
-
+         std::string_view cityView(chunkPtr, csvSeparatorPos);
+         
          // Mininal offset from the csv delimeter. Example: ";x.y", ";-x.y", ";xx.y", ";-xx.y".
          size_t const offsetDotPos = csvSeparatorPos + size_t(2);
          size_t const dotPos = chunkWiew.find(DECIMAL_SIGN, offsetDotPos);
          size_t const floatNumberStartPos = csvSeparatorPos + size_t(1);
          
-         std::string_view cityView(chunkPtr, csvSeparatorPos);
          // Floating point number view
          const char* numberPtr = chunkPtr + floatNumberStartPos;
          intermediateResults[chunkIdx].insert_or_assign(h, cityView, parseDecimalNumber_(numberPtr));
