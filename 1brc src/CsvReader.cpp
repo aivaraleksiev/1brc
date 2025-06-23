@@ -82,11 +82,11 @@ CsvReader::processMemoryChunks_(
 
    std::for_each(std::execution::par_unseq, fileChunks.begin(), fileChunks.end(), [&](struct MemoryChunk const& chunk) {
 
-      auto chunkWiew = chunk._chunkView;
+      auto chunkView = chunk._chunkView;
       auto const chunkIdx = chunk._idx;
 
-      while (!chunkWiew.empty()) {
-         const char* chunkPtr = chunkWiew.data();
+      while (!chunkView.empty()) {
+         const char* chunkPtr = chunkView.data();
          hash_t h = 0;
          size_t csvSeparatorPos = 0;
          // Find CSV separator and compute hash for city name
@@ -98,7 +98,7 @@ CsvReader::processMemoryChunks_(
          
          // Mininal offset from the csv delimeter. Example: ";x.y", ";-x.y", ";xx.y", ";-xx.y".
          size_t const offsetDotPos = csvSeparatorPos + size_t(2);
-         size_t const dotPos = chunkWiew.find(DECIMAL_SIGN, offsetDotPos);
+         size_t const dotPos = chunkView.find(DECIMAL_SIGN, offsetDotPos);
          size_t const floatNumberStartPos = csvSeparatorPos + size_t(1);
          
          // Floating point number view
@@ -106,9 +106,9 @@ CsvReader::processMemoryChunks_(
          intermediateResults[chunkIdx].insert_or_assign(h, cityView, parseDecimalNumber_(numberPtr));
 
          size_t const offsetLineEndPos = dotPos + size_t(2);
-         size_t const lineEndPos = chunkWiew.find('\n', offsetLineEndPos);
-         size_t const removeOuterPrefix = (lineEndPos == std::string_view::npos) ? chunkWiew.size() : lineEndPos + size_t(1);
-         chunkWiew.remove_prefix(removeOuterPrefix);
+         size_t const lineEndPos = chunkView.find('\n', offsetLineEndPos);
+         size_t const removeOuterPrefix = (lineEndPos == std::string_view::npos) ? chunkView.size() : lineEndPos + size_t(1);
+         chunkView.remove_prefix(removeOuterPrefix);
       }
    });
 
