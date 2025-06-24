@@ -78,36 +78,32 @@ void
 CsvReader::processMemoryChunks_(
    std::vector<MemoryChunk>&& fileChunks, WeatherStation& result)
 {
+
    std::vector<WeatherHashMap> intermediateResults(_threadsCount);
 
    std::for_each(std::execution::par_unseq, fileChunks.begin(), fileChunks.end(), [&](struct MemoryChunk const& chunk) {
 
       auto chunkView = chunk._chunkView;
-      auto const chunkIdx = chunk._idx;
 
       while (!chunkView.empty()) {
          const char* chunkPtr = chunkView.data();
-         hash_t h = 0;
-         size_t csvSeparatorPos = 0;
-         // Compute hash for City name and find CSV separator ';'.
-         while (chunkPtr[csvSeparatorPos] != CSV_SEPARATOR) {
-            h = FastCharacterHash16Func(chunkPtr[csvSeparatorPos], h);
-            ++csvSeparatorPos;
-         }
-         std::string_view cityView(chunkPtr, csvSeparatorPos);
-         
-         // Mininal offset from the csv delimeter. Example: ";x.y", ";-x.y", ";xx.y", ";-xx.y".
-         size_t const offsetDotPos = csvSeparatorPos + size_t(2);
-         size_t const dotPos = chunkView.find(DECIMAL_SIGN, offsetDotPos);
-         size_t const floatNumberStartPos = csvSeparatorPos + size_t(1);
-         
-         // Floating point number view
-         const char* numberPtr = chunkPtr + floatNumberStartPos;
-         intermediateResults[chunkIdx].insert_or_assign(h, cityView, parseDecimalNumber_(numberPtr));
+         const char* end = chunkPtr + chunkView.size();
 
-         size_t const offsetLineEndPos = dotPos + size_t(2);
-         size_t const lineEndPos = chunkView.find('\n', offsetLineEndPos);
-         size_t const removeOuterPrefix = (lineEndPos == std::string_view::npos) ? chunkView.size() : lineEndPos + size_t(1);
+         const char* cur = chunkPtr;
+         hash_t h = 0;
+         while (*cur != CSV_SEPARATOR) {
+            h = FastCharacterHash16Func(*cur, h);
+            ++cur;
+         }
+
+         std::string_view cityView(chunkPtr, cur - chunkPtr);
+         // skip csv separator ';' and move to floating point number starting position.
+         ++cur;
+         intermediateResults[chunk._idx].insert_or_assign(h, cityView, parseDecimalNumber_(cur));
+
+         // Assuming `cur` points to '\n', we're not at end of buffer.
+         // If we're at the end, treat it as EOF and consume the whole chunk.
+         size_t const removeOuterPrefix = (cur < end) ? ((cur - chunkPtr) + 1) : chunkView.size();
          chunkView.remove_prefix(removeOuterPrefix);
       }
    });
@@ -116,7 +112,7 @@ CsvReader::processMemoryChunks_(
       for (auto const& [cityView, temps] : umap) {
          result.addTemperature(cityView, temps._min, temps._max, temps._sum, temps._count);
       }
-   }   
+   }
 }
 
 
