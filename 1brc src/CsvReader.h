@@ -27,21 +27,26 @@ private:
    void processMemoryChunks_(
       std::vector<MemoryChunk>&& fileChunks, WeatherStation& result);
 
-   // Parses only one decimal numbers of type "x.y", "xx.y", "-x.y", "-xx.y".
-   inline int parseDecimalNumber_(const char* s)
+   // Parses a single decimal number of the form "x.y", "xx.y", "-x.y", or "-xx.y",
+   // and advances the pointer to the character immediately after the parsed number (ideally '\n').
+   inline int parseDecimalNumber_(const char*& curPtr)
    {
       // parse sign
       int sign = 1;
-      if (*s == '-') {
+      if (*curPtr == '-') {
          sign = -1;
-         s++;
+         ++curPtr;
       }
       // Case 1: "3.4"
-      if (s[1] == '.') {
-         return ((s[0] - '0') * 10 + (s[2] - '0')) * sign;
+      if (curPtr[1] == '.') {
+         int value = sign * ((curPtr[0] - '0') * 10 + (curPtr[2] - '0'));
+         curPtr += 3; // Move past "3.4"
+         return value;
       }
       // Case 2: "37.4"
-      return ((s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[3] - '0')) * sign;
+      int value = ((curPtr[0] - '0') * 100 + (curPtr[1] - '0') * 10 + (curPtr[3] - '0')) * sign;
+      curPtr += 4; // Move past "37.4"
+      return value;
    }
 
 private:
