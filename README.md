@@ -33,7 +33,7 @@ Benchmarks were run on i7-1185G7 CPU with 4 cores / 8 threads.
 
 | Rows       | 100 Million | 250 Million | 500 Million | 1 Billion |
 |------------|-------------|-------------|-------------|-----------|
-| Avg Time   | 0.6 s       | 1.6 s       | 3.5 s       | 9.7 s     |
+| Avg Time   | 0.6 s       | 1.6 s       | 3.5 s       | 9.6 s     |
 
 ## Build Instructions
 
