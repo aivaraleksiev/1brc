@@ -8,6 +8,8 @@
 #include <string_view>
 #include <cstdio>
 
+#include "Utils.h"
+
 using CityNameView = std::string_view;
 
 inline constexpr int32_t InvalidTempForMin= 200;
@@ -27,7 +29,7 @@ class WeatherStation
 public:
 
    struct TempStats {
-      inline void addTemp(int32_t temp)
+      ALWAYS_INLINE void addTemp(int32_t temp)
       {
          _min = std::min(temp, _min);
          _max = std::max(temp, _max);
@@ -41,7 +43,7 @@ public:
       int32_t _count{ 0 };
    };
 
-   inline void addTemperature(CityNameView city, int32_t min, int32_t max, int32_t sum, int32_t size)
+   ALWAYS_INLINE void addTemperature(CityNameView city, int32_t min, int32_t max, int32_t sum, int32_t size)
    {   
       auto& stats = _cityTemps[city];
       stats._min = std::min(stats._min, min);
