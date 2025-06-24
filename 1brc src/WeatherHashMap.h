@@ -27,19 +27,30 @@ inline constexpr int32_t rotateAmount = 13;
 
 inline constexpr hash_t hashMask = hash_t(BucketSize - 1);
 
-/*struct FastHash16Func {
-   hash_t operator()(std::string_view sv) const {
-      // Compute rotate-and-ADD/XOR hash
-      hash_t h = 0;
-      for (uint8_t ch : sv) {
-         // Perform a bitwise rotation (also known as a "circular shift") on the variable.
-         h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
-         h = h HASH_OP hash_t(ch);
-      }
-      return h;
-   }
-};*/
-
+/**
+ * Performs a single step fast 16-bit character hash.
+ *
+ * This function is intended for use in incremental hashing, where the input
+ * is read character-by-character (e.g., from a file or stream). It takes a single
+ * character and the current hash value, then applies a bitwise rotate-left followed by
+ * a mixing operation (e.g., XOR), returning the updated hash.
+ *
+ * The hashing approach is fast and simple, making it suitable for small keys
+ * or lightweight parsing scenarios such as tokenizing CSV fields.
+ * 
+ * Typical usage:
+ * @code
+ * hash_t h = 0;
+ * while (*cur != ';') {
+ *     h = FastCharacterHash16Func(*cur, h);
+ *     ++cur;
+ * }
+ * @endcode
+ *
+ * @param ch The input character to mix into the hash.
+ * @param h  The current hash value. Typically initialized to zero at the start of hashing.
+ * @return   The updated hash value after incorporating the character.
+ */
 ALWAYS_INLINE hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
 {
    h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
