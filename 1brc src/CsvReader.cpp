@@ -95,8 +95,8 @@ CsvReader::processMemoryChunks_(
             h = FastCharacterHash16Func(*cur, h);
             ++cur;
          }
-
          std::string_view cityView(chunkPtr, cur - chunkPtr);
+         
          // skip csv separator ';' and move to floating point number starting position.
          ++cur;
          intermediateResults[chunk._idx].insert_or_assign(h, cityView, parseDecimalNumber_(cur));
