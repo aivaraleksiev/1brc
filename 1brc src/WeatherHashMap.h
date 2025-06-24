@@ -60,7 +60,6 @@ ALWAYS_INLINE hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
 // Size is 32 bytes.
 using KeyValuePair = std::pair<std::string_view, WeatherStation::TempStats>;
 
-
 /* 
  * Iterator Class
  */
