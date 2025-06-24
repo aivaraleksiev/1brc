@@ -6,6 +6,7 @@
 #include <string_view>
 #include <boost/iostreams/device/mapped_file.hpp>
 
+#include "Utils.h"
 
 class WeatherStation;
 struct MemoryChunk;
@@ -29,7 +30,7 @@ private:
 
    // Parses a single decimal number of the form "x.y", "xx.y", "-x.y", or "-xx.y",
    // and advances the pointer to the character immediately after the parsed number (ideally '\n').
-   inline int parseDecimalNumber_(const char*& curPtr)
+   ALWAYS_INLINE int parseDecimalNumber_(const char*& curPtr)
    {
       // parse sign
       int sign = 1;
