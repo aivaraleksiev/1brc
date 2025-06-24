@@ -21,6 +21,12 @@ This solution prioritizes speed over safety and convenience, focusing on raw per
 - **Specialized Hash Map**: Designed for scenarios with a predefined, small set of elements—perfect for handling fixed keys like city names.
 - **Custom Iterator**: Provides STL-style iteration over the custom hash map for ease of use.
 
+### Out of Scope (But Worth Mentioning)
+While the spirit of the challenge is to rely strictly on your own code, a few techniques though outside the official scope are worth mentioning as potential optimizations:
+- **Perfect Hashing for City Names**:
+   - Since the list of city names is fixed and known ahead of time, a perfect hash function could be generated to provide constant-time lookups with no collisions. <br>
+   - This approach isn't used here to stay within the challenge constraints, but it's an interesting idea to explore separately.
+
 ## Performance Benchmark
 
 Benchmarks were run on a laptop CPU with 4 cores / 8 threads. The original challenge was based on a machine with 32 threads.
