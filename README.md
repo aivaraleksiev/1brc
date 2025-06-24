@@ -28,8 +28,8 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
    - This approach isn't used here to stay within the challenge constraints, but it's an interesting idea to explore separately.
 
 ## Performance Benchmark
-
-Benchmarks were run on a laptop CPU with 4 cores / 8 threads. The original challenge was based on a machine with 32 threads.
+The original challenge was based on a machine with 32 threads.<br>
+Benchmarks were run on i7-1185G7 CPU with 4 cores / 8 threads. 
 
 | Rows       | 100 Million | 250 Million | 500 Million | 1 Billion |
 |------------|-------------|-------------|-------------|-----------|
