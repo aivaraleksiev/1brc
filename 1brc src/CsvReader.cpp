@@ -88,6 +88,7 @@ CsvReader::processMemoryChunks_(
       while (cur < end) {
          const char* cityNamePtr = cur; // marks start of city name
          hash_t h = 0;
+         // Reads the city name character-by-character and incrementally hashes its content.
          while (*cur != CSV_SEPARATOR) {
             h = FastCharacterHash16Func(*cur, h);
             ++cur;
