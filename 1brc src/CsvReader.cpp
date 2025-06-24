@@ -78,33 +78,27 @@ void
 CsvReader::processMemoryChunks_(
    std::vector<MemoryChunk>&& fileChunks, WeatherStation& result)
 {
-
    std::vector<WeatherHashMap> intermediateResults(_threadsCount);
 
-   std::for_each(std::execution::par_unseq, fileChunks.begin(), fileChunks.end(), [&](struct MemoryChunk const& chunk) {
+   std::for_each(std::execution::par_unseq, fileChunks.begin(), fileChunks.end(), [&intermediateResults, this](struct MemoryChunk const& chunk) {
 
-      auto chunkView = chunk._chunkView;
+      const char* cur = chunk._chunkView.data();
+      const char* end = cur + chunk._chunkView.size();
 
-      while (!chunkView.empty()) {
-         const char* chunkPtr = chunkView.data();
-         const char* end = chunkPtr + chunkView.size();
-
-         const char* cur = chunkPtr;
+      while (cur < end) {
+         const char* cityNamePtr = cur; // marks start of city name
          hash_t h = 0;
          while (*cur != CSV_SEPARATOR) {
             h = FastCharacterHash16Func(*cur, h);
             ++cur;
          }
-         std::string_view cityView(chunkPtr, cur - chunkPtr);
-         
+         std::string_view cityView(cityNamePtr, cur - cityNamePtr);
+
          // skip csv separator ';' and move to floating point number starting position.
          ++cur;
          intermediateResults[chunk._idx].insert_or_assign(h, cityView, parseDecimalNumber_(cur));
-
-         // Assuming `cur` points to '\n', we're not at end of buffer.
-         // If we're at the end, treat it as EOF and consume the whole chunk.
-         size_t const removeOuterPrefix = (cur < end) ? ((cur - chunkPtr) + 1) : chunkView.size();
-         chunkView.remove_prefix(removeOuterPrefix);
+         // Advance the pointer to the character after '\n' or at `end` EOF.
+         ++cur;
       }
    });
 
