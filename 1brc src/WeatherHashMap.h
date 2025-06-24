@@ -9,6 +9,7 @@
 #include <cstddef>
 
 #include "WeatherStation.h"
+#include "Utils.h"
 
 #define HASH_OP ^
 
@@ -39,7 +40,7 @@ inline constexpr hash_t hashMask = hash_t(BucketSize - 1);
    }
 };*/
 
-inline hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
+ALWAYS_INLINE hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
 {
    h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
    return h HASH_OP hash_t(ch);
