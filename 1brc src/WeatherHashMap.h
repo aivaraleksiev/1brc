@@ -127,7 +127,7 @@ private:
 class WeatherHashMap {
 public:
 
-   void insert_or_assign(hash_t h, std::string_view key, int32_t value) {
+   ALWAYS_INLINE void insert_or_assign(hash_t h, std::string_view key, int32_t value) {
 
       KeyValuePair* slot = &_flatMap[h & hashMask];
 
