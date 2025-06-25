@@ -51,11 +51,13 @@ inline constexpr hash_t hashMask = hash_t(BucketSize - 1);
  * @param h  The current hash value. Typically initialized to zero at the start of hashing.
  * @return   The updated hash value after incorporating the character.
  */
+BEGIN_HOT_SEGMENT
 ALWAYS_INLINE hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
 {
    h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
    return h HASH_OP hash_t(ch);
 }
+END_HOT_SEGMENT
 
 // Size is 32 bytes.
 using KeyValuePair = std::pair<std::string_view, WeatherStation::TempStats>;
