@@ -20,6 +20,7 @@ This solution prioritizes speed over safety and convenience, focusing on raw per
 - **Custom Hash Function**: Efficiently hashes short keys with minimal collision risk, leveraging knowledge of the fixed number of keys.
 - **Specialized Hash Map**: Designed for scenarios with a predefined, small set of elements—perfect for handling fixed keys like city names.
 - **Custom Iterator**: Provides STL-style iteration over the custom hash map for ease of use.
+- **Compiler Optimization Hints**: Functions on the critical path are force-inlined and marked as hot to guide aggressive compiler optimizations and improve instruction cache locality.
 
 ### Out of Scope (But Worth Mentioning)
 While the spirit of the challenge is to rely strictly on your own code, a few techniques though outside the official scope are worth mentioning as potential optimizations:
