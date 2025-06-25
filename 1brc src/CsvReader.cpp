@@ -1,6 +1,7 @@
 // Author: Ayvar Aleksiev 2024
 
 #include <execution>
+#include <iostream>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/exception/diagnostic_information.hpp> 
