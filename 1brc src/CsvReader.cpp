@@ -60,7 +60,7 @@ CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize)
    chunksResult.reserve(_threadsCount);
 
    size_t start = 0;
-   for (uint64_t i = 0; i < _threadsCount; ++i) {
+   for (uint64_t i = 0; i < _threadsCount && start < view.size(); ++i) {
       size_t end = std::min(start + chunkSize, view.size());
       // Find the next newline after the proposed end
       while (end < view.size() && view[end] != '\n') ++end;
@@ -68,7 +68,6 @@ CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize)
 
       chunksResult.emplace_back(std::string_view{ &view[start], end - start }, i);
       start = end;
-      if (start >= view.size()) { break; }
    }
 
    return chunksResult;
