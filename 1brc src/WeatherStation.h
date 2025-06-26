@@ -29,7 +29,7 @@ class WeatherStation
 public:
 
    struct TempStats {
-      END_HOT_SEGMENT
+      BEGIN_HOT_SEGMENT
       ALWAYS_INLINE void addTemp(int32_t temp)
       {
          _min = std::min(temp, _min);
