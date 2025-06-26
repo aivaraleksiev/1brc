@@ -28,14 +28,18 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
    - Since the list of city names is fixed and known ahead of time, a perfect hash function could be generated to provide constant-time lookups with no collisions. <br>
    - This approach isn't used here to stay within the challenge constraints, but it's an interesting idea to explore separately.
 
-## Performance Benchmark
-The original challenge was based on a machine with 32 threads.<br>
-Benchmarks were run on i7-1185G7 CPU with 4 cores / 8 threads. 
+##  Performance Benchmark
 
-| Rows       | 100 Million | 250 Million | 500 Million | 1 Billion |
-|------------|-------------|-------------|-------------|-----------|
-| Avg Time   | 0.6 s       | 1.6 s       | 3.5 s       | 9.6 s     |
+- Original challenge was benchmarked on a machine with **32 threads**.
+- These benchmarks were run on:
+  - Intel i7-1185G7  (4 cores / 8 threads)
+  - Intel Ultra7 165H (6P cores + 8E cores + 2LE cores = 22 threads)
 
+
+| CPU / Threads            | 100M Rows | 250M Rows | 500M Rows | 1B Rows |
+|--------------------------|-----------|-----------|-----------|---------|
+| i7-1185G7 (8 threads)    | 0.60 s    | 1.60 s    | 3.50 s    | 9.60 s  |
+| Ultra7 165H (22 threads) | 0.33 s    | 0.70 s    | 1.35 s    | 2.70 s  |
 ## Build Instructions
 
 To build and run the project, follow these steps:
