@@ -43,6 +43,7 @@ To build and run the project, follow these steps:
 1. **Install Dependencies**:
    ```bash
    vcpkg install boost:x64-windows
+   vcpkg install boost-iostreams:x64-windows
    ```
 2. **Configure the Project**:
    - Set the C++ standard to C++20.
