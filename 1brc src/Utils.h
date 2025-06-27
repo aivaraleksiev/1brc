@@ -1,3 +1,5 @@
+// Author: Ayvar Aleksiev 2025
+
 #pragma once
 
 #if defined(_MSC_VER)
