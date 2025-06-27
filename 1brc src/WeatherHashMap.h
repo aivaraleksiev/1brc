@@ -185,13 +185,8 @@ public:
    */
 
    size_t size() const {
-      size_t result = 0;
-      for (auto const& pair : _flatMap) {
-         if (!pair.first.empty()) {
-            ++result;
-         }
-      }
-      return result;
+      return std::count_if(
+         _flatMap.begin(), _flatMap.end(), [](const auto& pair) { return !pair.first.empty(); });
    }
 
    WeatherHashMapIterator begin() {
