@@ -1,4 +1,4 @@
-// Author: Ayvar Aleksiev 2024
+// Author: Ayvar Aleksiev 2024-2025
 
 #ifdef _WIN32
 // Necessary for SetConsoleOutputCP and CP_UTF8
