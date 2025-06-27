@@ -1,4 +1,4 @@
-// Author: Ayvar Aleksiev 2024
+// Author: Ayvar Aleksiev 2024-2025
 
 #include <execution>
 #include <iostream>
