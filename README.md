@@ -28,7 +28,7 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
    - Since the list of city names is fixed and known ahead of time, a perfect hash function could be generated to provide constant-time lookups with no collisions. <br>
    - This approach isn't used here to stay within the challenge constraints, but it's an interesting idea to explore separately.
 - **SPDK (Storage Performance Development Kit)**:
-   - Instead of memory-mapped files, SPDK (Storage Performance Development Kit) bypasses the kernel I/O stack and could theoretically enable even faster data ingestion for NVMe storage.
+   - Instead of memory-mapped files, SPDK bypasses the kernel I/O stack and could theoretically enable even faster data ingestion for NVMe storage.
    - It's overkill for a file-based benchmark like this and well outside the challenge’s intended scope.
 
 ##  Performance Benchmark
