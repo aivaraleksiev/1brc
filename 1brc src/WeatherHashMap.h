@@ -131,7 +131,7 @@ public:
    BEGIN_HOT_SEGMENT
    ALWAYS_INLINE void insert_or_assign(hash_t h, std::string_view key, int32_t value) {
 
-      KeyValuePair* slot = &_flatMap[h & hashMask];
+      KeyValuePair* slot = &_kvEntries[h & hashMask];
 
       // Handling custom scenario with expected keys.
       // If the keys are different this may end as an infinite loop.
@@ -150,7 +150,7 @@ public:
          else if (probe < probeLimit) {
             // Try linear probing for collision resolution
             h += (++probe);
-            slot = &_flatMap[h & hashMask];
+            slot = &_kvEntries[h & hashMask];
          }
       }
    }
@@ -161,7 +161,7 @@ public:
    
       hash_t h = FastHash16Func()(key);
    
-      KeyValuePair* slot = &_flatMap[h & hashMask];
+      KeyValuePair* slot = &_kvEntries[h & hashMask];
    
       // Handling custom scenario with expected keys.
       // If the keys are different this may end as an infinite loop.
@@ -178,7 +178,7 @@ public:
          else if (probe < probeLimit) {
             // Try linear probing for collision resolution
             h += (++probe);
-            slot = &_flatMap[h & hashMask];
+            slot = &_kvEntries[h & hashMask];
          }
       }
    }
@@ -186,17 +186,17 @@ public:
 
    size_t size() const {
       return std::count_if(
-         _flatMap.begin(), _flatMap.end(), [](const auto& pair) { return !pair.first.empty(); });
+         _kvEntries.begin(), _kvEntries.end(), [](const auto& pair) { return !pair.first.empty(); });
    }
 
    WeatherHashMapIterator begin() {
-      return WeatherHashMapIterator(_flatMap.data(), _flatMap.data() + BucketSize);
+      return WeatherHashMapIterator(_kvEntries.data(), _kvEntries.data() + BucketSize);
    }
 
    WeatherHashMapIterator end() {
-      return WeatherHashMapIterator(_flatMap.data() + BucketSize, _flatMap.data() + BucketSize);
+      return WeatherHashMapIterator(_kvEntries.data() + BucketSize, _kvEntries.data() + BucketSize);
    }
 
 private:
-   std::array <KeyValuePair, BucketSize> _flatMap;
+   std::array <KeyValuePair, BucketSize> _kvEntries;
 };
