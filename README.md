@@ -30,7 +30,6 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
 - **SPDK (Storage Performance Development Kit)**:
    - Instead of memory-mapped files, SPDK bypasses the kernel I/O stack and could theoretically enable even faster data ingestion for NVMe storage.
    - It's overkill for a file-based benchmark like this and well outside the challenge’s intended scope.
-- **`Boost.Asio` + io_uring**
 
 ##  Performance Benchmark
 
