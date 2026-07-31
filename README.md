@@ -53,7 +53,6 @@ To build and run the project, follow these steps:
    vcpkg install boost:x64-windows
    ```
 2. **Configure the Project**:
-   - Set the C++ standard to C++20.
    - In Visual Studio 2026, choose `Release x64` as the solution platform.
 
 3. **Generate Sample CSV Files**:
