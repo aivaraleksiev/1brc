@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception/diagnostic_information.hpp>
 #include<boost/container/flat_map.hpp>
 
 #include "CsvReader.h"
@@ -14,7 +14,6 @@
 namespace {
    // CSV delimeter
    constexpr char CSV_SEPARATOR = ';';
-   constexpr char DECIMAL_SIGN = '.';
 
    constexpr uint64_t MIN_FILE_SIZE_FOR_ASYNC = 4096;
 };
@@ -40,9 +39,9 @@ CsvReader::parse(std::string const& file, WeatherStation& result)
    catch (...) {
       return false;
    }
- 
+
    std::string_view view(_csvFileRead->data(), _csvFileRead->size());
-   
+
    if (_csvFileRead->size() >= MIN_FILE_SIZE_FOR_ASYNC) {
       _threadsCount = std::thread::hardware_concurrency();
    }
@@ -109,5 +108,3 @@ CsvReader::processMemoryChunks_(
       }
    }
 }
-
-

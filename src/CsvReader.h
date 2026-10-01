@@ -19,7 +19,7 @@ public:
    bool parse(std::string const& file, WeatherStation& result);
 
 private:
-   
+
    // Splitting file to memory chunks.
    std::vector<MemoryChunk>
       splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize);
@@ -38,8 +38,9 @@ private:
          sign = -1;
          ++curPtr;
       }
+      static constexpr char DECIMAL_SIGN = '.';
       // Case 1: "3.4"
-      if (curPtr[1] == '.') {
+      if (curPtr[1] == DECIMAL_SIGN) {
          int value = sign * ((curPtr[0] - '0') * 10 + (curPtr[2] - '0'));
          curPtr += 3; // Move past "3.4"
          return value;
@@ -52,7 +53,7 @@ private:
 
 private:
    using fileColse = decltype(
-      [](mapped_file_source* file) { 
+      [](mapped_file_source* file) {
          file->close();
       });
    std::unique_ptr<mapped_file_source, fileColse> _csvFileRead{ new mapped_file_source };
