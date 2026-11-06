@@ -38,12 +38,15 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
 - These benchmarks were run on:
   - Intel i7-1185G7  (4 cores / 8 threads)
   - Intel Ultra7 165H (6P cores + 8E cores + 2LE cores = 22 threads)
+  - AMD Ryzen AI 7 350 (4P cores + 4E cores = 16 threads)
 
 
-| CPU / Threads            | 100M Rows | 250M Rows | 500M Rows | 1B Rows |
-|--------------------------|-----------|-----------|-----------|---------|
-| i7-1185G7 (8 threads)    | 0.60 s    | 1.60 s    | 3.50 s    | 9.60 s  |
-| Ultra7 165H (22 threads) | 0.33 s    | 0.70 s    | 1.35 s    | 2.70 s  |
+| CPU / Threads                   | 100M Rows | 250M Rows | 500M Rows | 1B Rows |
+|---------------------------------|-----------|-----------|-----------|---------|
+| i7-1185G7 (8 threads)           | 0.60 s    | 1.60 s    | 3.50 s    | 9.60 s  |
+| Ultra7 165H (22 threads)        | 0.33 s    | 0.70 s    | 1.35 s    | 2.70 s  |
+| AMD Ryzen AI 7 350 (16 threads) | 0.23 s    | 0.55 s    | 1.07 s    | 2.12 s  |
+
 ## Build Instructions
 
 To build and run the project, follow these steps:

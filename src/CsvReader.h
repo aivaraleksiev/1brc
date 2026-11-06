@@ -52,11 +52,11 @@ private:
    }
 
 private:
-   using fileColse = decltype(
+   using fileCloser = decltype(
       [](mapped_file_source* file) {
          file->close();
       });
-   std::unique_ptr<mapped_file_source, fileColse> _csvFileRead{ new mapped_file_source };
+   std::unique_ptr<mapped_file_source, fileCloser> _csvFileRead{ new mapped_file_source };
 
    uint64_t _threadsCount{1};
 };
