@@ -49,28 +49,32 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
 
 ## Build Instructions
 
-To build and run the project, follow these steps:
+Cross-platform build for Windows, Linux, and macOS using xmake.
 
-1. **Install Dependencies**:
-   ```bash
-   vcpkg install boost:x64-windows
-   ```
-2. **Configure the Project**:
-   - In Visual Studio 2026, choose `Release x64` as the solution platform.
+1. **Prerequisites**:
+- xmake
+- LLVM/Clang with C++23 support
+
+2. **Build the Project**
+```bash
+xmake               # Default build configuration
+xmake f -m debug    # Set Build mode (debug, release, releasedbg)   
+```
 
 3. **Generate Sample CSV Files**:
-   - Install Python 3.
-   - Install required packages:
-     ```bash
-     pip install numpy pandas polars tqdm
-     ```
-   - Create CSV files:
-     ```bash
-     python createMeasurements.py
-     python createMeasurements.py -r NumberOfRecords
-     ```
+- Install Python 3.
+- Install required packages:
+  ```bash
+  pip install numpy pandas polars tqdm
+  ```
+- Create CSV files:
+  ```bash
+  python createMeasurements.py
+  python createMeasurements.py -r NumberOfRecords
+  ```
 
 4. **Run the Program**:
-   ```bash
-   1br.exe "path_to_file"
-   ```
+```bash
+xmake run "path_to_file"       # Run the default target
+xmake run 1br "path_to_file"   # Run a specific target
+```
