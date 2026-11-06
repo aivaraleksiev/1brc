@@ -5,7 +5,7 @@
 
 ## Challenge Overview
 
-The task is to perform basic floating-point arithmetic on 1 billion rows as quickly as possible, without relying on external dependencies.
+The task is to perform basic floating-point arithmetic on 1 billion rows as quickly as possible.
 
 ## Approach
 
