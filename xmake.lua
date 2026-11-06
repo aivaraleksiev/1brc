@@ -21,7 +21,7 @@ set_defaultmode("releasedbg")
 add_requires("boost 1.92.0", {configs = {iostreams = true}})
 
 -- Main executable
-target("1br")
+target("1brc")
     set_kind("binary")
     add_files("src/*.cpp")
     add_packages("boost")

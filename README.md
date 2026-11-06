@@ -75,5 +75,5 @@ xmake f -m debug    # Set Build mode (debug, release, releasedbg)
 
 4. **Run the Program**:
 ```bash
-xmake run 1br "absolute_path_to_file"   # Run with an input file
+xmake run 1brc "absolute_path_to_file"   # Run with an input file
 ```
