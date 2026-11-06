@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <print>
 
 #include "WeatherStation.h"
 #include "CsvReader.h"
@@ -31,7 +32,5 @@ int main(int argc, char **argv)
    auto endTime = std::chrono::steady_clock::now();
    std::chrono::duration<double> const diffTime = endTime - startTime;
 
-   std::cout << "\n----------\n"
-             << "Time 1brc: " << std::fixed << std::setprecision(9) << diffTime.count()
-             << "\n----------\n";
+   std::print("\n----------\nTime 1brc: {:.9f}\n----------\n", diffTime.count());
 }
