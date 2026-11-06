@@ -75,6 +75,5 @@ xmake f -m debug    # Set Build mode (debug, release, releasedbg)
 
 4. **Run the Program**:
 ```bash
-xmake run "path_to_file"       # Run the default target
 xmake run 1br "path_to_file"   # Run a specific target
 ```
