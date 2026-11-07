@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <cstdio>
+#include <cassert>
 
 #include "Utils.h"
 
@@ -55,6 +56,9 @@ public:
    }
 
    void print() const {
+      // 1BRC guarantees non-empty input, so no empty-container handling is needed.
+      assert(!_cityTemps.empty());
+
       std::string result;
       result.reserve(kMaxOutputBytes);
       result.push_back('{');
@@ -74,7 +78,13 @@ public:
          result.append(statsBuffer, static_cast<std::size_t>(wBytesLen));
       }
 
-      result.append("}\n", 2);
+      // The output format is guaranteed to be non-empty due to the 1BRC problem constraints.
+      // Non-empty input guarantees a trailing ", "; replace it with "}\n".
+      // This avoids checking whether to add a separator on every iteration.
+      // Replace the trailing ", " with "}\n"
+      result[result.size() - 2] = '}';
+      result.back() = '\n';
+
       std::fwrite(result.data(), 1, result.size(), stdout);
    }
 
