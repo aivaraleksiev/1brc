@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Generated compilation database and benchmark input
+/compile_commands.json
+/measurements.txt
+
 # User-specific files
 *.rsuser
 *.suo
