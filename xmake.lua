@@ -11,6 +11,7 @@ if is_plat("windows") then
 else
     set_toolchains("clang")
 end
+add_rules("plugin.compile_commands.autoupdate", {outputdir = "."})
 set_warnings("all")
 
 -- Build modes
