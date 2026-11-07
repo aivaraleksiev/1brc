@@ -12,8 +12,8 @@
 
 using CityNameView = std::string_view;
 
-inline constexpr int32_t InvalidTempForMin= 200;
-inline constexpr int32_t InvalidTempForMax = -200;
+inline constexpr int32_t InvalidTempForMin= 1000;
+inline constexpr int32_t InvalidTempForMax = -1000;
 
 // Empirically determined upper bound for the largest printable payload observed (~10,666 chars).
 // 167 cache lines × 64 bytes (typical x86_64 cache line size) = 10,688 bytes. Adjust if needed.
