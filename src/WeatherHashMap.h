@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include <string_view>
-#include <array>
 
+#include <array>
+#include <string_view>
 #include <iterator>
 #include <cstddef>
+#include <stdexcept>
 
 #include "WeatherStation.h"
 #include "Utils.h"
@@ -134,7 +135,6 @@ public:
       KeyValuePair* slot = &_kvEntries[h & sHashMask];
 
       // Handling custom scenario with expected keys.
-      // If the keys are different this may end as an infinite loop.
       for (uint16_t probe = 0;;) {
          if (slot->first.empty()) {
             // empty slot -> claim it
@@ -147,11 +147,12 @@ public:
             slot->second.addTemp(value);
             return;
          }
-         else if (probe < sProbeLimit) {
-            // Try linear probing for collision resolution
-            h += (++probe);
-            slot = &_kvEntries[h & sHashMask];
+         if (probe >= sProbeLimit) [[unlikely]] {
+            throw std::runtime_error("Probe limit exceeded");
          }
+         // Try linear probing for collision resolution.
+         h += (++probe);
+         slot = &_kvEntries[h & sHashMask];
       }
    }
    END_HOT_SEGMENT
