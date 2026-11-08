@@ -17,15 +17,15 @@
 using hash_t = uint16_t;
 
 // Hash bucket size. Should be a power of 2, so we can levarage bitwise AND operator instead of modulo.
-inline constexpr int32_t BucketSize = 2048;
+inline constexpr int32_t sBucketSize = 2048;
 
 // Number of steps to perform for linear probing.
-inline constexpr uint16_t probeLimit = 3;
+inline constexpr uint16_t sProbeLimit = 3;
 
 // Bits to rotate left after each step
-inline constexpr int32_t rotateAmount = 13;
+inline constexpr int32_t sRotateAmount = 13;
 
-inline constexpr hash_t hashMask = hash_t(BucketSize - 1);
+inline constexpr hash_t sHashMask = hash_t(sBucketSize - 1);
 
 /**
  * Performs a single step fast 16-bit character hash.
@@ -54,7 +54,7 @@ inline constexpr hash_t hashMask = hash_t(BucketSize - 1);
 BEGIN_HOT_SEGMENT
 ALWAYS_INLINE hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
 {
-   h = (h << rotateAmount) | (h >> (sizeof(h) * 8 - rotateAmount));
+   h = (h << sRotateAmount) | (h >> (sizeof(h) * 8 - sRotateAmount));
    return h HASH_OP hash_t(ch);
 }
 END_HOT_SEGMENT
@@ -131,7 +131,7 @@ public:
    BEGIN_HOT_SEGMENT
    ALWAYS_INLINE void insert_or_assign(hash_t h, std::string_view key, int32_t value) {
 
-      KeyValuePair* slot = &_kvEntries[h & hashMask];
+      KeyValuePair* slot = &_kvEntries[h & sHashMask];
 
       // Handling custom scenario with expected keys.
       // If the keys are different this may end as an infinite loop.
@@ -147,10 +147,10 @@ public:
             slot->second.addTemp(value);
             return;
          }
-         else if (probe < probeLimit) {
+         else if (probe < sProbeLimit) {
             // Try linear probing for collision resolution
             h += (++probe);
-            slot = &_kvEntries[h & hashMask];
+            slot = &_kvEntries[h & sHashMask];
          }
       }
    }
@@ -161,7 +161,7 @@ public:
    
       hash_t h = FastHash16Func()(key);
    
-      KeyValuePair* slot = &_kvEntries[h & hashMask];
+      KeyValuePair* slot = &_kvEntries[h & sHashMask];
    
       // Handling custom scenario with expected keys.
       // If the keys are different this may end as an infinite loop.
@@ -175,10 +175,10 @@ public:
             // correct slot found
             return slot->second;
          }
-         else if (probe < probeLimit) {
+         else if (probe < sProbeLimit) {
             // Try linear probing for collision resolution
             h += (++probe);
-            slot = &_kvEntries[h & hashMask];
+            slot = &_kvEntries[h & sHashMask];
          }
       }
    }
@@ -190,13 +190,13 @@ public:
    }
 
    WeatherHashMapIterator begin() {
-      return WeatherHashMapIterator(_kvEntries.data(), _kvEntries.data() + BucketSize);
+      return WeatherHashMapIterator(_kvEntries.data(), _kvEntries.data() + sBucketSize);
    }
 
    WeatherHashMapIterator end() {
-      return WeatherHashMapIterator(_kvEntries.data() + BucketSize, _kvEntries.data() + BucketSize);
+      return WeatherHashMapIterator(_kvEntries.data() + sBucketSize, _kvEntries.data() + sBucketSize);
    }
 
 private:
-   std::array <KeyValuePair, BucketSize> _kvEntries;
+   std::array <KeyValuePair, sBucketSize> _kvEntries;
 };
