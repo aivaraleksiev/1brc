@@ -52,13 +52,11 @@ inline constexpr hash_t sHashMask = hash_t(sBucketSize - 1);
  * @param h  The current hash value. Typically initialized to zero at the start of hashing.
  * @return   The updated hash value after incorporating the character.
  */
-BEGIN_HOT_SEGMENT
 ALWAYS_INLINE hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
 {
    h = (h << sRotateAmount) | (h >> (sizeof(h) * 8 - sRotateAmount));
    return h HASH_OP hash_t(ch);
 }
-END_HOT_SEGMENT
 
 // Size is 32 bytes.
 using KeyValuePair = std::pair<std::string_view, WeatherStation::TempStats>;
@@ -129,7 +127,6 @@ private:
  */
 class WeatherHashMap {
 public:
-   BEGIN_HOT_SEGMENT
    ALWAYS_INLINE void insert_or_assign(hash_t h, std::string_view key, int32_t value) {
 
       KeyValuePair* slot = &_kvEntries[h & sHashMask];
@@ -155,7 +152,6 @@ public:
          slot = &_kvEntries[h & sHashMask];
       }
    }
-   END_HOT_SEGMENT
 
    /*
    WeatherStation::TempStats& operator[](std::string_view key) {
