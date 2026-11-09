@@ -15,7 +15,7 @@ This solution prioritizes speed over safety and convenience, focusing on raw per
 
 - **Optimized CSV Parsing**: Fast reading of large CSV files.
 - **Memory-Mapped Files**: Reduces I/O overhead by mapping files directly into memory.
-- **Asynchronous Processing**: Splits the file into memory blocks, processed in parallel to maximize performance.
+- **Parallel Processing with Dynamic Work Distribution:**: Splits the file into fixed-size chunks (16 MiB by default) and processes them in parallel to maximize performance. Optimized for hybrid CPUs (P/E/LP-E cores), allowing faster cores to process more chunks instead of waiting for slower cores to finish.
 - **Custom Integer-Based Number Parser**: Avoids floating-point operations during parsing for enhanced speed.
 - **Custom Hash Function**: Efficiently hashes short keys with minimal collision risk, leveraging knowledge of the fixed number of keys.
 - **Specialized Hash Map**: Designed for scenarios with a predefined, small set of elements—perfect for handling fixed keys like city names.
@@ -30,26 +30,22 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
 - **SPDK (Storage Performance Development Kit)**:
    - Instead of memory-mapped files, SPDK bypasses the kernel I/O stack and could theoretically enable even faster data ingestion for NVMe storage.
    - It's overkill for a file-based benchmark like this and well outside the challenge’s intended scope.
- - **`Boost Asio` + `io_uring`**
+   - **`Boost Asio` + `io_uring`**
 
 ##  Performance Benchmark
 
 - Original challenge was benchmarked on a machine with **32 threads**.
 - These benchmarks were run on:
-  - Intel i7-1185G7  (4 cores / 8 threads)
-  - Intel Ultra7 165H (6P cores + 8E cores + 2LE cores = 22 threads)
   - AMD Ryzen AI 7 350 (4P cores + 4E cores = 16 threads)
 
 
 | CPU / Threads                   | 100M Rows | 250M Rows | 500M Rows | 1B Rows |
 |---------------------------------|-----------|-----------|-----------|---------|
-| i7-1185G7 (8 threads)           | 0.60 s    | 1.60 s    | 3.50 s    | 9.60 s  |
-| Ultra7 165H (22 threads)        | 0.33 s    | 0.70 s    | 1.35 s    | 2.70 s  |
-| AMD Ryzen AI 7 350 (16 threads) | 0.23 s    | 0.55 s    | 1.07 s    | 2.12 s  |
+| AMD Ryzen AI 7 350 (16 threads) | 0.20 s    | 0.49 s    | 1.00 s    | 1.90 s  |
 
 ## Build Instructions
 
-Cross-platform build for Windows, Linux, and macOS using xmake.
+Tested on Windows with xmake and clang-cl. Linux and macOS builds are configured but untested.
 
 1. **Prerequisites**:
 - xmake
