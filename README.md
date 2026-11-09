@@ -22,21 +22,6 @@ This solution prioritizes speed over safety and convenience, focusing on raw per
 - **Custom Iterator**: Provides STL-style iteration over the custom hash map for ease of use.
 - **Compiler Optimization Hints**: Small functions on the critical path (hashing, hash map insert, number parsing, statistics update) are force-inlined into the parsing loop.
 
-### Out of Scope (But Worth Mentioning)
-While the spirit of the challenge is to rely strictly on your own code, a few techniques though outside the official scope are worth mentioning as potential optimizations:
-- **Perfect Hashing for City Names**:
-   - Since the list of city names is fixed and known ahead of time, a perfect hash function could be generated to provide constant-time lookups with no collisions. <br>
-   - This approach isn't used here to stay within the challenge constraints, but it's an interesting idea to explore separately.
-- **SPDK (Storage Performance Development Kit)**:
-   - Instead of memory-mapped files, SPDK bypasses the kernel I/O stack and could theoretically enable even faster data ingestion for NVMe storage.
-   - It's overkill for a file-based benchmark like this and well outside the challenge’s intended scope.
-   - **`Boost Asio` + `io_uring`**
-- **SIMD / SWAR Parsing with CPU-Specific Compiler Flags**: _(Tried Without Gain)_
-   - Instead of scanning each city name byte by byte, 8 bytes (SWAR, using plain 64-bit integer operations) or 32 bytes (SIMD, e.g. AVX2) can be checked at once to find the `;` and `\n` separators. The hash can then be computed from whole 64-bit words instead of one character at a time.
-   - This requires building for a specific instruction set, e.g. `-march=x86-64-v3` (AVX2, BMI1/BMI2), so that `std::countr_zero` compiles to a single `tzcnt` instruction and AVX2 intrinsics are available. The resulting binary only runs on CPUs that support these instructions.
-   - Not used here to keep the code portable and simple, but it is one of the largest single-thread optimizations available.
-   - Analysis: It was slower compared to prvious runs. Not investigated further.
-
 ##  Performance Benchmark
 
 - Original challenge was benchmarked on a machine with **32 threads**.
@@ -78,3 +63,19 @@ xmake f -m debug    # Set Build mode (debug, release, releasedbg)
 ```bash
 xmake run 1brc "absolute_path_to_file"   # Run with an input file
 ```
+
+---
+
+## Out of Scope (But Worth Mentioning)
+While the spirit of the challenge is to rely strictly on your own code, a few techniques though outside the official scope are worth mentioning as potential optimizations:
+- **Perfect Hashing for City Names**:
+   - Since the list of city names is fixed and known ahead of time, a perfect hash function could be generated to provide constant-time lookups with no collisions. <br>
+   - This approach isn't used here to stay within the challenge constraints, but it's an interesting idea to explore separately.
+- **SPDK (Storage Performance Development Kit)**:
+   - Instead of memory-mapped files, SPDK bypasses the kernel I/O stack and could theoretically enable even faster data ingestion for NVMe storage.
+   - It's overkill for a file-based benchmark like this and well outside the challenge’s intended scope.
+- **SIMD / SWAR Parsing with CPU-Specific Compiler Flags**: _(Tried Without Gain)_
+   - Instead of scanning each city name byte by byte, 8 bytes (SWAR, using plain 64-bit integer operations) or 32 bytes (SIMD, e.g. AVX2) can be checked at once to find the `;` and `\n` separators. The hash can then be computed from whole 64-bit words instead of one character at a time.
+   - This requires building for a specific instruction set, e.g. `-march=x86-64-v3` (AVX2, BMI1/BMI2), so that `std::countr_zero` compiles to a single `tzcnt` instruction and AVX2 intrinsics are available. The resulting binary only runs on CPUs that support these instructions.
+   - Not used here to keep the code portable and simple, but it is one of the largest single-thread optimizations available.
+   - Analysis: It was slower compared to previous runs. Not investigated further.

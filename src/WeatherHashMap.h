@@ -4,71 +4,57 @@
 
 
 #include <array>
+#include <bit>
+#include <cstdint>
 #include <string_view>
 #include <iterator>
 #include <cstddef>
-#include <stdexcept>
 
 #include "WeatherStation.h"
 #include "Utils.h"
 
-#define HASH_OP ^
-
-// Data type to use for the hash
-using hash_t = uint16_t;
-
 // Hash bucket size. Should be a power of 2, so we can levarage bitwise AND operator instead of modulo.
-inline constexpr int32_t sBucketSize = 2048;
+inline constexpr uint32_t sBucketSize = 2048;
 
-// Number of steps to perform for linear probing.
-inline constexpr uint16_t sProbeLimit = 3;
+inline constexpr uint32_t sHashMask = sBucketSize - 1;
 
-// Bits to rotate left after each step
-inline constexpr int32_t sRotateAmount = 13;
-
-inline constexpr hash_t sHashMask = hash_t(sBucketSize - 1);
+// Number of hash bits used to select the bucket (log2 of sBucketSize).
+inline constexpr int sBucketBits = std::countr_zero(sBucketSize);
 
 /**
- * Performs a single step fast 16-bit character hash.
+ * Hashes a station name from its first 16 bytes.
  *
- * This function is intended for use in incremental hashing, where the input
- * is read character-by-character (e.g., from a file or stream). It takes a single
- * character and the current hash value, then applies a bitwise rotate-left followed by
- * a mixing operation (e.g., XOR), returning the updated hash.
+ * w0 holds bytes 0..7 and w1 holds bytes 8..15 of the name (little-endian), with all bytes
+ * at or after the ';' separator zeroed. Names longer than 16 bytes that share the same
+ * first 16 bytes collide, which is resolved by linear probing.
  *
- * The hashing approach is fast and simple, making it suitable for small keys
- * or lightweight parsing scenarios such as tokenizing CSV fields.
- * 
- * Typical usage:
- * @code
- * hash_t h = 0;
- * while (*cur != ';') {
- *     h = FastCharacterHash16Func(*cur, h);
- *     ++cur;
- * }
- * @endcode
- *
- * @param ch The input character to mix into the hash.
- * @param h  The current hash value. Typically initialized to zero at the start of hashing.
- * @return   The updated hash value after incorporating the character.
+ * The multiplication spreads the bits, and the bucket is taken from the top bits of the result.
  */
-ALWAYS_INLINE hash_t FastCharacterHash16Func(uint8_t ch, hash_t h)
+ALWAYS_INLINE uint64_t HashNameWords(uint64_t w0, uint64_t w1)
 {
-   h = (h << sRotateAmount) | (h >> (sizeof(h) * 8 - sRotateAmount));
-   return h HASH_OP hash_t(ch);
+   return (w0 ^ std::rotl(w1, 17)) * 0x9E3779B97F4A7C15ull;
 }
 
-// Size is 32 bytes.
-using KeyValuePair = std::pair<std::string_view, WeatherStation::TempStats>;
+/*
+ * A single hash map slot. Aligned to a cache line, so a lookup touches exactly one line.
+ * w0/w1 cache the first 16 bytes of the name, so that most key comparisons are two
+ * integer compares instead of a memcmp call.
+ */
+struct alignas(64) WeatherHashMapEntry {
+   uint64_t w0{ 0 };
+   uint64_t w1{ 0 };
+   std::string_view name{};
+   WeatherStation::TempStats stats{};
+};
 
-/* 
+/*
  * Iterator Class
  */
 class WeatherHashMapIterator {
 public:
    using iterator_category = std::forward_iterator_tag;
    using difference_type = std::ptrdiff_t;
-   using value_type = KeyValuePair;
+   using value_type = WeatherHashMapEntry;
    using pointer = value_type*;
    using reference = value_type&;
 
@@ -95,7 +81,7 @@ public:
       return tmp;
    }
 
-   friend bool operator==(const WeatherHashMapIterator& a, const WeatherHashMapIterator& b) { 
+   friend bool operator==(const WeatherHashMapIterator& a, const WeatherHashMapIterator& b) {
       return a._ptr == b._ptr;
    }
    friend bool operator!=(const WeatherHashMapIterator& a, const WeatherHashMapIterator& b) {
@@ -105,7 +91,7 @@ public:
 private:
    inline void advance_to_valid() {
       // Skip empty slots
-      while (_ptr != _end && _ptr->first.empty()) {
+      while (_ptr != _end && _ptr->name.empty()) {
          ++_ptr;
       }
    }
@@ -121,79 +107,67 @@ private:
  * This class is particularly optimized for cases where the number of elements is fixed or known in advance,
  * making it an ideal choice when dealing with a predefined set of keys,
  * such as a fixed list of weather stations or cities.
- * 
+ *
  * Note that, this hash map is not a generic solution.
  * It's purpose is to fit the 413 keys that are expected to be read.
  */
 class WeatherHashMap {
 public:
-   ALWAYS_INLINE void insert_or_assign(hash_t h, std::string_view key, int32_t value) {
+   /**
+    * Adds a temperature to the station identified by `key`.
+    *
+    * @param hash  HashNameWords(w0, w1).
+    * @param w0    Bytes 0..7 of the name, bytes past the name zeroed.
+    * @param w1    Bytes 8..15 of the name, bytes past the name zeroed.
+    * @param key   The full name (points into the mapped file).
+    * @param value Temperature in tenths of a degree.
+    */
+   ALWAYS_INLINE void insert_or_assign(
+      uint64_t hash, uint64_t w0, uint64_t w1, std::string_view key, int32_t value)
+   {
+      uint32_t idx = static_cast<uint32_t>(hash >> (64 - sBucketBits));
 
-      KeyValuePair* slot = &_kvEntries[h & sHashMask];
+      // `probe` is only read by the assert, so it is unused in release builds.
+      for ([[maybe_unused]] uint32_t probe = 0;; ++probe) {
+         WeatherHashMapEntry& entry = _entries[idx];
 
-      // Handling custom scenario with expected keys.
-      for (uint16_t probe = 0;;) {
-         if (slot->first.empty()) {
-            // empty slot -> claim it
-            slot->first = key;
-            slot->second.addTemp(value);
+         // Hot path: the first 16 bytes match. Names up to 16 bytes are fully covered by w0/w1
+         // (the size check distinguishes a 16-byte name from a longer one with the same prefix);
+         // longer names need a full compare.
+         if (entry.w0 == w0 && entry.w1 == w1 &&
+             (key.size() <= 16 ? entry.name.size() == key.size() : entry.name == key)) {
+            entry.stats.addTemp(value);
             return;
          }
-         else if (slot->first == key) {
-            // correct slot found
-            slot->second.addTemp(value);
+         // Names are never empty, so an empty name marks a free slot.
+         if (entry.name.empty()) {
+            entry.w0 = w0;
+            entry.w1 = w1;
+            entry.name = key;
+            entry.stats.addTemp(value);
             return;
          }
          // Can only loop forever if the table is full (more keys than sBucketSize).
          // Not expected for 1BRC (413 keys).
          assert(probe < sBucketSize && "WeatherHashMap is full");
-         // Try linear probing for collision resolution.
-         h += (++probe);
-         slot = &_kvEntries[h & sHashMask];
+         // Linear probing for collision resolution.
+         idx = (idx + 1) & sHashMask;
       }
    }
-
-   /*
-   WeatherStation::TempStats& operator[](std::string_view key) {
-   
-      hash_t h = FastHash16Func()(key);
-   
-      KeyValuePair* slot = &_kvEntries[h & sHashMask];
-   
-      // Handling custom scenario with expected keys.
-      // If the keys are different this may end as an infinite loop.
-      for (uint16_t probe = 0;;) {
-         if (slot->first.empty()) {
-            // empty slot -> claim it
-            slot->first = key;
-            return slot->second;
-         }
-         else if (slot->first == key) {
-            // correct slot found
-            return slot->second;
-         }
-         else if (probe < sProbeLimit) {
-            // Try linear probing for collision resolution
-            h += (++probe);
-            slot = &_kvEntries[h & sHashMask];
-         }
-      }
-   }
-   */
 
    size_t size() const {
       return std::count_if(
-         _kvEntries.begin(), _kvEntries.end(), [](const auto& pair) { return !pair.first.empty(); });
+         _entries.begin(), _entries.end(), [](const auto& entry) { return !entry.name.empty(); });
    }
 
    WeatherHashMapIterator begin() {
-      return WeatherHashMapIterator(_kvEntries.data(), _kvEntries.data() + sBucketSize);
+      return WeatherHashMapIterator(_entries.data(), _entries.data() + sBucketSize);
    }
 
    WeatherHashMapIterator end() {
-      return WeatherHashMapIterator(_kvEntries.data() + sBucketSize, _kvEntries.data() + sBucketSize);
+      return WeatherHashMapIterator(_entries.data() + sBucketSize, _entries.data() + sBucketSize);
    }
 
 private:
-   std::array <KeyValuePair, sBucketSize> _kvEntries;
+   std::array<WeatherHashMapEntry, sBucketSize> _entries;
 };
