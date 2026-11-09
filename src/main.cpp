@@ -16,6 +16,10 @@
 
 int main(int argc, char **argv)
 {
+   if (argc < 2) {
+      std::println(stderr, "Usage: 1brc <file>");
+      return 1;
+   }
 #ifdef _WIN32
    // Set the console output code page to UTF-8
    SetConsoleOutputCP(CP_UTF8);
