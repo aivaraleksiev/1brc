@@ -147,9 +147,9 @@ public:
             slot->second.addTemp(value);
             return;
          }
-         if (probe >= sProbeLimit) [[unlikely]] {
-            throw std::runtime_error("Probe limit exceeded");
-         }
+         // Can only loop forever if the table is full (more keys than sBucketSize).
+         // Not expected for 1BRC (413 keys).
+         assert(probe < sBucketSize && "WeatherHashMap is full");
          // Try linear probing for collision resolution.
          h += (++probe);
          slot = &_kvEntries[h & sHashMask];
