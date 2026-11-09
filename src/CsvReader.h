@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <memory>
 #include <string_view>
 #include <boost/iostreams/device/mapped_file.hpp>
 
@@ -52,11 +51,7 @@ private:
    }
 
 private:
-   using fileCloser = decltype(
-      [](mapped_file_source* file) {
-         file->close();
-      });
-   std::unique_ptr<mapped_file_source, fileCloser> _csvFileRead{ new mapped_file_source };
+   mapped_file_source _csvFileRead;
 
    uint64_t _threadsCount{1};
 };

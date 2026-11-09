@@ -33,8 +33,8 @@ bool
 CsvReader::parse(std::string const& file, WeatherStation& result)
 {
    try {
-      _csvFileRead->open(file);
-      if (!_csvFileRead->is_open()) {
+      _csvFileRead.open(file);
+      if (!_csvFileRead.is_open()) {
          return false;
       }
    }
@@ -46,7 +46,7 @@ CsvReader::parse(std::string const& file, WeatherStation& result)
       return false;
    }
 
-   std::string_view view(_csvFileRead->data(), _csvFileRead->size());
+   std::string_view view(_csvFileRead.data(), _csvFileRead.size());
 
    std::vector<MemoryChunk> chunks = splitFileToMemoryChunks_(view, CHUNK_SIZE_BYTES);
 
