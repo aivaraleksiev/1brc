@@ -35,6 +35,7 @@ While the spirit of the challenge is to rely strictly on your own code, a few te
    - Instead of scanning each city name byte by byte, 8 bytes (SWAR, using plain 64-bit integer operations) or 32 bytes (SIMD, e.g. AVX2) can be checked at once to find the `;` and `\n` separators. The hash can then be computed from whole 64-bit words instead of one character at a time.
    - This requires building for a specific instruction set, e.g. `-march=x86-64-v3` (AVX2, BMI1/BMI2), so that `std::countr_zero` compiles to a single `tzcnt` instruction and AVX2 intrinsics are available. The resulting binary only runs on CPUs that support these instructions.
    - Not used here to keep the code portable and simple, but it is one of the largest single-thread optimizations available.
+   - Tried Without Gain. It was slower compared to prvious runs. Not investigated further.
 
 ##  Performance Benchmark
 
