@@ -50,7 +50,6 @@ CsvReader::parse(std::string const& file, WeatherStation& result)
 
    std::vector<MemoryChunk> chunks = splitFileToMemoryChunks_(view, CHUNK_SIZE_BYTES);
 
-   // hardware_concurrency() may return 0. No point in having more threads than chunks.
    _threadsCount = std::max<uint64_t>(1, std::thread::hardware_concurrency());
    _threadsCount = std::max<uint64_t>(1, std::min<uint64_t>(_threadsCount, chunks.size()));
 
@@ -68,8 +67,12 @@ CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize)
    while (start < view.size()) {
       size_t end = std::min(start + chunkSize, view.size());
       // Find the next newline after the proposed end
-      while (end < view.size() && view[end] != '\n') ++end;
-      if (end < view.size()) ++end; // Include the newline
+      while (end < view.size() && view[end] != '\n') {
+         ++end;
+      }
+      if (end < view.size()) {
+         ++end; // Include the newline
+      }
 
       chunksResult.emplace_back(std::string_view{ &view[start], end - start });
       start = end;
@@ -125,7 +128,7 @@ CsvReader::processMemoryChunks_(
          threads.emplace_back(worker, std::ref(intermediateResults[t]));
       }
       worker(intermediateResults[0]);
-   } // jthreads join here
+   }
 
    for (auto& umap : intermediateResults) {
       for (auto const& [cityView, temps] : umap) {
