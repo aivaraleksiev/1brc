@@ -1,7 +1,11 @@
 // Author: Ayvar Aleksiev 2024-2025
 
-#include <execution>
+#include <algorithm>
+#include <atomic>
+#include <functional>
 #include <iostream>
+#include <thread>
+#include <vector>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -14,12 +18,15 @@ namespace {
    // CSV delimeter
    constexpr char CSV_SEPARATOR = ';';
 
-   constexpr uint64_t MIN_FILE_SIZE_FOR_ASYNC = 4096;
+   // Size of a single work unit handed out to the worker threads.
+   // Threads grab chunks dynamically, so faster cores (P-cores) simply process more chunks
+   // than slower ones (E/LP-E cores) instead of waiting for them.
+   // Tuned value for AMD Ryzen AI 7 350: 16 MiB.
+   constexpr uint64_t CHUNK_SIZE_BYTES = 16ull * 1024 * 1024;
 };
 
 struct MemoryChunk {
    std::string_view _chunkView{};
-   uint64_t _idx{};
 };
 
 bool
@@ -41,14 +48,13 @@ CsvReader::parse(std::string const& file, WeatherStation& result)
 
    std::string_view view(_csvFileRead->data(), _csvFileRead->size());
 
-   if (_csvFileRead->size() >= MIN_FILE_SIZE_FOR_ASYNC) {
-      _threadsCount = std::thread::hardware_concurrency();
-   }
+   std::vector<MemoryChunk> chunks = splitFileToMemoryChunks_(view, CHUNK_SIZE_BYTES);
 
-   uint64_t const chunkSizePerThread = _csvFileRead->size() / _threadsCount;
+   // hardware_concurrency() may return 0. No point in having more threads than chunks.
+   _threadsCount = std::max<uint64_t>(1, std::thread::hardware_concurrency());
+   _threadsCount = std::max<uint64_t>(1, std::min<uint64_t>(_threadsCount, chunks.size()));
 
-   processMemoryChunks_(
-      splitFileToMemoryChunks_(view, chunkSizePerThread), result);
+   processMemoryChunks_(std::move(chunks), result);
    return true;
 }
 
@@ -56,16 +62,16 @@ std::vector<MemoryChunk>
 CsvReader::splitFileToMemoryChunks_(std::string_view& view, uint64_t chunkSize)
 {
    std::vector<MemoryChunk> chunksResult;
-   chunksResult.reserve(_threadsCount);
+   chunksResult.reserve(view.size() / chunkSize + 1);
 
    size_t start = 0;
-   for (uint64_t i = 0; i < _threadsCount && start < view.size(); ++i) {
+   while (start < view.size()) {
       size_t end = std::min(start + chunkSize, view.size());
       // Find the next newline after the proposed end
       while (end < view.size() && view[end] != '\n') ++end;
       if (end < view.size()) ++end; // Include the newline
 
-      chunksResult.emplace_back(std::string_view{ &view[start], end - start }, i);
+      chunksResult.emplace_back(std::string_view{ &view[start], end - start });
       start = end;
    }
 
@@ -76,10 +82,13 @@ void
 CsvReader::processMemoryChunks_(
    std::vector<MemoryChunk>&& fileChunks, WeatherStation& result)
 {
+   // One hash map per thread, so the hot loop needs no synchronization.
    std::vector<WeatherHashMap> intermediateResults(_threadsCount);
 
-   std::for_each(std::execution::par_unseq, fileChunks.begin(), fileChunks.end(), [&intermediateResults, this](struct MemoryChunk const& chunk) {
+   // Index of the next chunk to be processed. Shared by all worker threads.
+   std::atomic<size_t> nextChunk{ 0 };
 
+   auto processChunk = [this](MemoryChunk const& chunk, WeatherHashMap& map) {
       const char* cur = chunk._chunkView.data();
       const char* end = cur + chunk._chunkView.size();
 
@@ -95,11 +104,28 @@ CsvReader::processMemoryChunks_(
 
          // skip csv separator ';' and move to floating point number starting position.
          ++cur;
-         intermediateResults[chunk._idx].insert_or_assign(h, cityView, parseDecimalNumber_(cur));
+         map.insert_or_assign(h, cityView, parseDecimalNumber_(cur));
          // Advance the pointer to the character after '\n' or at `end` EOF.
          ++cur;
       }
-   });
+   };
+
+   // Each worker keeps grabbing the next unprocessed chunk until none are left.
+   auto worker = [&](WeatherHashMap& map) {
+      for (size_t i; (i = nextChunk.fetch_add(1, std::memory_order_relaxed)) < fileChunks.size();) {
+         processChunk(fileChunks[i], map);
+      }
+   };
+
+   {
+      // The calling thread works too, so only (_threadsCount - 1) extra threads are spawned.
+      std::vector<std::jthread> threads;
+      threads.reserve(_threadsCount - 1);
+      for (uint64_t t = 1; t < _threadsCount; ++t) {
+         threads.emplace_back(worker, std::ref(intermediateResults[t]));
+      }
+      worker(intermediateResults[0]);
+   } // jthreads join here
 
    for (auto& umap : intermediateResults) {
       for (auto const& [cityView, temps] : umap) {
